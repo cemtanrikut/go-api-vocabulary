@@ -29,6 +29,8 @@ func main() {
 	router.HandleFunc("/translate/{from}/{to}/{text}", TranslateHandler).Methods(http.MethodGet)
 	router.HandleFunc("/translateDB/{from}/{to}/{text}", TranslateDBHandler).Methods(http.MethodGet)
 	router.HandleFunc("/delete/{id}", DeleteHandler).Methods(http.MethodGet)
+	router.HandleFunc("/get/{id}", GetHandler).Methods(http.MethodGet)
+	router.HandleFunc("/get/{device_id}", GetAllHandler).Methods(http.MethodGet)
 
 	log.Println("Listening ...")
 	err := http.ListenAndServe(":8080", router)
@@ -61,6 +63,24 @@ func TranslateDBHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	fmt.Println("Result is: ", result)
 
+}
+
+func GetHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	data := vars["id"]
+	result := vocabulary.GetData(data, w, r, client, collection)
+
+	w.WriteHeader(http.StatusOK)
+	fmt.Println("Result is: ", result)
+}
+
+func GetAllHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	data := vars["device_id"]
+	result := vocabulary.GetDatasFromDeviceID(data, w, r, client, collection)
+
+	w.WriteHeader(http.StatusOK)
+	fmt.Println("Result is: ", result)
 }
 
 func DeleteHandler(w http.ResponseWriter, r *http.Request) {

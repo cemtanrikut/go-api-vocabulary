@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 
 	gt "github.com/bas24/googletranslatefree"
@@ -17,6 +18,7 @@ import (
 
 type VocabularyData struct {
 	ID         string   `json:"_id" bson:"_id"`
+	DeviceID   string   `json:"device_id" bson:"device_id"`
 	Response   Response `json:"response" bson:"response"`
 	CreateDate string   `json:"create_date" bson:"create_date"`
 	IsActive   bool     `json:"is_active" bson:"is_active"`
@@ -60,6 +62,7 @@ func SaveTextToDB(resp http.ResponseWriter, req *http.Request, client *mongo.Cli
 
 	var request = VocabularyData{
 		ID:         string(newUUID),
+		DeviceID:   "1",
 		Response:   translator,
 		CreateDate: time.Now().GoString(),
 		IsActive:   true,
@@ -78,6 +81,52 @@ func SaveTextToDB(resp http.ResponseWriter, req *http.Request, client *mongo.Cli
 	}
 
 	return string(jsonData)
+}
+
+func GetData(id string, resp http.ResponseWriter, req *http.Request, client *mongo.Client, collection *mongo.Collection) string {
+	resp.Header().Set("Content-Type", "application/json")
+	var data VocabularyData
+
+	userData := collection.FindOne(context.Background(), bson.M{"id": id})
+	err := userData.Decode(&data)
+
+	if err != nil {
+		return err.Error()
+	}
+
+	jsonResult, jsonError := json.Marshal(data)
+	if jsonError != nil {
+		return jsonError.Error()
+	}
+
+	return string(jsonResult)
+}
+
+func GetDatasFromDeviceID(deviceID string, resp http.ResponseWriter, req *http.Request, client *mongo.Client, collection *mongo.Collection) string {
+	resp.Header().Set("Content-Type", "application/json")
+	var vocabMList []primitive.M
+
+	cursor, err := collection.Find(context.Background(), bson.M{"is_active": true, "device_id": deviceID})
+	if err != nil {
+		return err.Error()
+	}
+
+	for cursor.Next(context.Background()) {
+		var user bson.M
+		if err = cursor.Decode(&user); err != nil {
+			return err.Error()
+		}
+		vocabMList = append(vocabMList, user)
+	}
+	defer cursor.Close(context.Background())
+
+	jsonResult, err := json.Marshal(vocabMList)
+	if err != nil {
+		return err.Error()
+	}
+
+	return string(jsonResult)
+
 }
 
 func DeleteFromDB(resp http.ResponseWriter, req *http.Request, client *mongo.Client, collection *mongo.Collection, id string) string {

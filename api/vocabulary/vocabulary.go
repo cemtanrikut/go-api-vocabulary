@@ -102,7 +102,7 @@ func GetData(id string, resp http.ResponseWriter, req *http.Request, client *mon
 	return string(jsonResult)
 }
 
-func GetDatasFromDeviceID(deviceID string, resp http.ResponseWriter, req *http.Request, client *mongo.Client, collection *mongo.Collection) string {
+func GetDatasByDeviceID(deviceID string, resp http.ResponseWriter, req *http.Request, client *mongo.Client, collection *mongo.Collection) string {
 	resp.Header().Set("Content-Type", "application/json")
 	var vocabMList []primitive.M
 

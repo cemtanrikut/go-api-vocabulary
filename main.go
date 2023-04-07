@@ -77,7 +77,7 @@ func GetHandler(w http.ResponseWriter, r *http.Request) {
 func GetAllHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	data := vars["device_id"]
-	result := vocabulary.GetDatasFromDeviceID(data, w, r, client, collection)
+	result := vocabulary.GetDatasByDeviceID(data, w, r, client, collection)
 
 	w.WriteHeader(http.StatusOK)
 	fmt.Println("Result is: ", result)

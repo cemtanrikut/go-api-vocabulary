@@ -28,6 +28,7 @@ func main() {
 	fmt.Println("***", &router, ctx, &client, &collection)
 	router.HandleFunc("/translate/{from}/{to}/{text}", TranslateHandler).Methods(http.MethodGet)
 	router.HandleFunc("/translateDB/{from}/{to}/{text}", TranslateDBHandler).Methods(http.MethodGet)
+	router.HandleFunc("/delete/{id}", DeleteHandler).Methods(http.MethodGet)
 
 	log.Println("Listening ...")
 	err := http.ListenAndServe(":8080", router)
@@ -60,4 +61,13 @@ func TranslateDBHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	fmt.Println("Result is: ", result)
 
+}
+
+func DeleteHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	data := vars["id"]
+	result := vocabulary.DeleteFromDB(w, r, client, collection, data)
+
+	w.WriteHeader(http.StatusOK)
+	fmt.Println("Result is: ", result)
 }

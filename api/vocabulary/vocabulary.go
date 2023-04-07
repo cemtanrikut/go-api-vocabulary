@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"time"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 
 	gt "github.com/bas24/googletranslatefree"
@@ -77,4 +78,19 @@ func SaveTextToDB(resp http.ResponseWriter, req *http.Request, client *mongo.Cli
 	}
 
 	return string(jsonData)
+}
+
+func DeleteFromDB(resp http.ResponseWriter, req *http.Request, client *mongo.Client, collection *mongo.Collection, id string) string {
+	resp.Header().Set("Content-Type", "application/json")
+
+	_, err := collection.UpdateOne(context.Background(), bson.M{"_id": id, "is_active": true}, bson.D{{"$set",
+		bson.D{
+			{"is_active", false},
+		},
+	}})
+	if err != nil {
+		fmt.Println("not found")
+		return "Error"
+	}
+	return "Success"
 }
